@@ -40,13 +40,13 @@ input {
 
     <body>
         <div id="sample-data">
-            <label>Nível de confiança (%):</label><input id="confidence" value="95"><br>
-            <label>Precisão (casas):</label><input id="precision" type="number" value="4"><br>
+            <label>Nível de confiança (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100"><br>
+            <label>Precisão (casas):</label><input id="precision" type="number" value="4" min="0"><br>
             <br>
-            <label>Média:</label><input id="mean" value="0"><br>
-            <label>Desvio padrão:</label><input id="stdev" value="1"><br>
-            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20"><br>
-            <label><input type="checkbox" id="population-n-known" onchange="document.getElementById('population-n').disabled = !this.checked;">Tamanho da população (N):</label><input id="population-n" type="number" value="1000" disabled><br>
+            <label>Média:</label><input id="mean" value="0" type="number" step="any" ><br>
+            <label>Desvio padrão:</label><input id="stdev" value="1" type="number" step="any" ><br>
+            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0"><br>
+            <label><input type="checkbox" id="population-n-known" onchange="document.getElementById('population-n').disabled = !this.checked;">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" disabled><br>
 
             <button id="update-button" onclick="update();">Atualizar</button>
         </div>
@@ -62,8 +62,15 @@ input {
         <div class="result">
             <h2>Poder do Teste</h2>
 
-            <label>Média em H0:</label><input id="mean-h0" type="number" value="20" onchange="updatePower()"><br>
-            Poder do teste unilateral: <span id="power"></span>%
+            <label>Média em H0:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
+            Poder do teste (unilateral): <span id="power"></span>%
+            <br>
+            <br>
+            <label>Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updatePower()">
+            <br>
+            Amostras necessárias (teste unilateral): <span id="required-sample-uni"></span>
+            <br>
+            Amostras necessárias (teste bilateral): <span id="required-sample-bi"></span>
         </div>
 
         <script>
@@ -132,6 +139,13 @@ function updatePower() {
     }
 
     set("power", power * 100);
+
+    var targetPower = get("target-power") / 100;
+    var numUni = aNormal(2 * (1 - confidence), n - 1) + aNormal(2 * (1 - targetPower), n - 1);
+    var numBi = aStudentT(1 - confidence, n - 1) + aStudentT(1 - targetPower, n - 1);
+    var dem = Math.abs(mean - meanH0) / stdev;
+    set("required-sample-uni", Math.pow(numUni / dem, 2));
+    set("required-sample-bi", Math.pow(numBi / dem, 2));
 }
 
 window.onload = update;
