@@ -16,12 +16,16 @@ body {
 label {
     text-align: right;
     display: inline-block;
-    width: 12em;
+    width: 14em;
     padding-right: 0.5em;
 }
 
 input {
     width: auto;
+}
+
+.result {
+
 }
 
 #sample-data {
@@ -36,21 +40,24 @@ input {
 
     <body>
         <div id="sample-data">
-            <label>Nível de Confiança (%):</label><input id="confidence" value="95"><br>
+            <label>Nível de confiança (%):</label><input id="confidence" value="95"><br>
             <label>Precisão (casas):</label><input id="precision" type="number" value="4"><br>
             <br>
             <label>Média:</label><input id="mean" value="0"><br>
-            <label>Desvio Padrão:</label><input id="stdev" value="1"><br>
-            <label>n:</label><input id="n" type="number" value="100"><br>
+            <label>Desvio padrão:</label><input id="stdev" value="1"><br>
+            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20"><br>
+            <label><input type="checkbox" id="population-n-known" onchange="document.getElementById('population-n').disabled = !this.checked;">Tamanho da população (N):</label><input id="population-n" type="number" value="1000" disabled><br>
 
             <button id="update-button" onclick="update();">Atualizar</button>
         </div>
 
-        <h2>Intervalo de Confiança</h2>
+        <div class="result">
+            <h2>Intervalo de Confiança</h2>
 
-        <span id="interval-mean">0</span> ± <span id="interval-width">1</span>
-        <p>
-        Entre <span id="interval-min">0</span> e <span id="interval-max">1</span>
+            <span id="interval-mean">0</span> ± <span id="interval-width">1</span>
+            <p>
+            Entre <span id="interval-min">0</span> e <span id="interval-max">1</span>
+        </div>
 
         <script>
 function get(variableName) {
@@ -65,7 +72,8 @@ var confidence,
     precision,
     mean,
     stdev,
-    n;
+    n,
+    populationN;
 
 function update() {
     confidence = get("confidence") / 100;
@@ -73,6 +81,11 @@ function update() {
     mean = get("mean");
     stdev = get("stdev");
     n = get("n");
+    if (document.getElementById("population-n").disabled) {
+        populationN = Number.POSITIVE_INFINITY;
+    } else {
+        populationN = get("population-n");
+    }    
 
     updateConfidenceInterval();
 }
@@ -82,10 +95,15 @@ function updateConfidenceInterval() {
     var sx = stdev / Math.sqrt(n);
     var t = aStudentT(1 - confidence, n - 1);
     var width = t * sx;
+    if (n > 0.05 * populationN) {
+        width *= Math.sqrt((populationN - n) / (populationN - 1));
+    }
     set("interval-width",  width);
     set("interval-min",  mean - width);
     set("interval-max",  mean + width);
 }
+
+window.onload = update;
         </script>
 
         <script>
