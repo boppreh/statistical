@@ -59,6 +59,13 @@ input {
             Entre <span id="interval-min">0</span> e <span id="interval-max">1</span>
         </div>
 
+        <div class="result">
+            <h2>Poder do Teste</h2>
+
+            <label>Média em H0:</label><input id="mean-h0" type="number" value="20" onchange="updatePower()"><br>
+            Poder do teste unilateral: <span id="power"></span>%
+        </div>
+
         <script>
 function get(variableName) {
     return Number(document.getElementById(variableName).value);
@@ -88,19 +95,43 @@ function update() {
     }    
 
     updateConfidenceInterval();
+    updatePower();
 }
 
 function updateConfidenceInterval() {
     set("interval-mean", mean);
+
     var sx = stdev / Math.sqrt(n);
     var t = aStudentT(1 - confidence, n - 1);
     var width = t * sx;
     if (n > 0.05 * populationN) {
         width *= Math.sqrt((populationN - n) / (populationN - 1));
     }
+
     set("interval-width",  width);
     set("interval-min",  mean - width);
     set("interval-max",  mean + width);
+}
+
+function updatePower() {
+    var meanH0 = get("mean-h0");
+
+    var tc = aStudentT(2 * (1 - confidence), n - 1);
+    if (meanH0 > mean) {
+        tc = -tc;
+    }
+    var xCritical = meanH0 + tc * stdev / Math.sqrt(n);
+    var tbeta = (xCritical - mean) * Math.sqrt(n) / stdev;
+    var beta = studentT(tbeta, n - 1) / 2;
+    var power;
+    // Fix for Student-T being two-tailed.
+    if (tbeta > 0) {
+        power = beta;
+    } else {
+        power = 1 - beta;
+    }
+
+    set("power", power * 100);
 }
 
 window.onload = update;
@@ -175,6 +206,23 @@ function aStudentT(p, n) {
         t = 1 / v - 1;
         dv = dv / 2;
         if (studentT(t, n) > p) {
+            v = v - dv;
+        } else {
+            v = v + dv;
+        }
+    }
+    return t;
+}
+
+// Calculates z such that normal(z) == p.
+function aNormal(p) {
+    var v = 0.5;
+    var dv = 0.5;
+    var t = 0;
+    while (dv > 1e-6) {
+        t = 1 / v - 1;
+        dv = dv / 2;
+        if (normal(t, n) > p) {
             v = v - dv;
         } else {
             v = v + dv;
