@@ -153,7 +153,7 @@ function update() {
 function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
-    var t = (mean - expectedMean) * Math.sqrt(n) / stdev;
+    var t = Math.abs(mean - expectedMean) * Math.sqrt(n) / stdev;
     var pValue = distribution(t, n);
     var displayPValue = (pValue * 100).toFixed(precision);
     var displayAlpha = ((1 - confidence) * 100).toFixed(precision);
