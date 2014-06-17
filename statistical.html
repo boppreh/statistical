@@ -160,9 +160,9 @@ function updateSingleMeanTest() {
     set("expected-mean-p", displayPValue);
 
     if (pValue < 1 - confidence) {
-        set("expected-mean-result", displayPValue + "&lt;" + displayAlpha + " portanto <strong>rejeita-se H0</strong>");
+        set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>");
     } else {
-        set("expected-mean-result", displayPValue + "&gt;" + displayAlpha + " portanto <strong>aceita-se H0</strong>");
+        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>");
     }
 }
 
