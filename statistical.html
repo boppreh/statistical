@@ -154,6 +154,18 @@ function update() {
     updatePower();
 }
 
+
+function updateConfidenceInterval() {
+    set("interval-mean", mean);
+
+    var t = a(distribution, (1 - confidence) / 2, n - 1);
+    var width = t * sx;
+
+    set("interval-width",  width);
+    set("interval-min",  mean - width);
+    set("interval-max",  mean + width);
+}
+
 function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
@@ -168,17 +180,6 @@ function updateSingleMeanTest() {
     } else {
         set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>");
     }
-}
-
-function updateConfidenceInterval() {
-    set("interval-mean", mean);
-
-    var t = a(distribution, (1 - confidence) / 2, n - 1);
-    var width = t * sx;
-
-    set("interval-width",  width);
-    set("interval-min",  mean - width);
-    set("interval-max",  mean + width);
 }
 
 function updatePower() {
