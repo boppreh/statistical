@@ -39,15 +39,15 @@ body > .result {
 
 .result {
     display: inline-block;
-    margin: 2em;
-    width: 22em;
+    margin: 1em;
+    width: 24em;
 }
 
 #sample-data {
     display: inline-block;
 }
 
-#update-button {
+#load-button {
     width: 100%;
 }
         </style>
@@ -57,6 +57,7 @@ body > .result {
         <div id="sample-data">
             <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
             <label>Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
+            <label><input type="checkbox" id="unilateral" onchange="update()">Testes unilaterais</label><br>
             <br>
             <label>Média observada:</label><input id="mean" value="0" type="number" step="any" onchange="update()"><br>
             <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="sample" checked>Desvio padrão amostral:</label><input id="stdev" value="1" type="number" step="any" onchange="update()"><br>
@@ -64,8 +65,7 @@ body > .result {
             <br>
             <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
             <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
-            <br>
-            <label><input type="checkbox" id="unilateral" onchange="update()">Testes unilaterais</label>
+            <button id="load-button" onclick="loadData()">Carregar dados</button><br>
         </div>
         <br>
 
@@ -101,7 +101,7 @@ body > .result {
         <div class="result">
             <h2>Teste de Duas Médias</h2>
 
-            Segundo grupo:
+            Segundo grupo:<br>
             <label>Média:</label><input id="second-mean" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
             <label>Desvio padrão:</label><input id="second-stdev" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
             <label>Tamanho da amostra:</label><input id="second-n" type="number" value="20" step="1" onchange="updateComparison()"><br>
@@ -121,7 +121,7 @@ function format(value) {
 }
 
 function get(variableName) {
-    return Number(document.getElementById(variableName).value);
+    return Number(document.getElementById(variableName).value.replace(",", "."));
 }
 
 function set(elementId, value, includesStyle) {
@@ -130,6 +130,43 @@ function set(elementId, value, includesStyle) {
         value = "<strong>" + value + "</strong>";
     }
     document.getElementById(elementId).innerHTML = value;
+}
+
+function loadData() {
+    var allData = prompt("Cole os dados numéricos separados por espaço.");
+    if (!allData) {
+        return;
+    }
+
+    var strData = allData.replace(",", ".").split(/\s+/);
+    var data = [];
+    var n = strData.length;
+    for (var i = 0; i < n; i++) {
+        var value = Number(strData[i]);
+        if (isNaN(value)) {
+            alert("Erro ao ler o valor " + strData[i]);
+            return;
+        }
+        data[i] = value;
+    }
+
+    var sum = 0;
+    for (var i = 0; i < n; i++) {
+        sum += data[i];
+    }
+    var mean = sum / n;
+    var squaredDifs = 0;
+    for (var i = 0; i < n; i++) {
+        squaredDifs += Math.pow(data[i] - mean, 2);
+    }
+
+    
+    var stdev = Math.sqrt(squaredDifs / (n - 1));
+    document.getElementById("mean").value = mean;
+    document.getElementById("stdev").value = stdev;
+    document.getElementById("n").value = n;
+    document.getElementsByName("stdev-known")[0].checked = true;
+    updateFormFields();
 }
 
 function updateFormFields() {
