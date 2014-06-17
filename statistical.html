@@ -160,7 +160,7 @@ function updatePower() {
 
     var targetPower = get("target-power") / 100;
     var numUni = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
-    var numBi = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
+    var numBi = a(distribution, (1 - confidence) / 2, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var dem = Math.abs(mean - meanH0) / stdev;
     set("required-sample-uni", Math.pow(numUni / dem, 2));
     set("required-sample-bi", Math.pow(numBi / dem, 2));
