@@ -141,7 +141,7 @@ function updateConfidenceInterval() {
 function updatePower() {
     var meanH0 = get("mean-h0");
 
-    var tc = a(distribution, 2 * (1 - confidence), n - 1);
+    var tc = a(distribution, 1 - confidence, n - 1);
     if (meanH0 > mean) {
         tc = -tc;
     }
@@ -150,17 +150,16 @@ function updatePower() {
     set("x-critical", xCritical);
 
     var tbeta = (xCritical - mean) * Math.sqrt(n) / stdev;
-    var beta = distribution(tbeta, n - 1) / 2;
-    // Fix for the distributions being two tailed.
-    if (tbeta < 0) {
-        beta = 1 - beta;
+    if (meanH0 < mean) {
+        tbeta = -tbeta;
     }
+    var beta = distribution(tbeta, n - 1);
     var power = 1 - beta;
 
     set("power", power * 100);
 
     var targetPower = get("target-power") / 100;
-    var numUni = a(distribution, 2 * (1 - confidence), n - 1) + a(distribution, 2 * (1 - targetPower), n - 1);
+    var numUni = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var numBi = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var dem = Math.abs(mean - meanH0) / stdev;
     set("required-sample-uni", Math.pow(numUni / dem, 2));
@@ -204,17 +203,35 @@ function chiSq(x, n) {
     return 1 - p;
 }
 
+// Single tailed normal.
 function normal(z) {
+    if (z > 0) {
+        return dNormal(z) / 2;
+    } else {
+        return 1 - dNormal(z) / 2;
+    }    
+}
+
+function studentT(t, n) {
+    if (t > 0) {
+        return dStudentT(t, n) / 2;
+    } else {
+        return 1 - dStudentT(t, n) / 2;
+    }
+}
+
+// Two tailed Normal.
+function dNormal(z) {
     var q = z * z
     if (Math.abs(z) > 7) {
         return (1 - 1 / q + 3 / (q * q)) * Math.exp(-q / 2) / (Math.abs(z) * Math.sqrt(piD2));
-    } {
+    } else {
         return chiSq(q, 1);
     }
 }
 
 // Two tailed Student T test for n degrees of freedom.
-function studentT(t, n) {
+function dStudentT(t, n) {
     t = Math.abs(t);
     var w = t / Math.sqrt(n);
     var th = Math.atan(w);
@@ -232,19 +249,20 @@ function studentT(t, n) {
 
 // Calculates t such that distribution(t, n) == p.
 function a(distribution, p, n) {
+    var mult = p > 0.5 ? -1 : 1;
     var v = 0.5;
     var dv = 0.5;
     var t = 0;
     while (dv > 1e-6) {
         t = 1 / v - 1;
         dv = dv / 2;
-        if (distribution(t, n) > p) {
+        if (distribution(mult * t, n) > p) {
             v = v - dv;
         } else {
             v = v + dv;
         }
     }
-    return t;
+    return mult * t;
 }
 
 function statCom(q, i, j, b) {
