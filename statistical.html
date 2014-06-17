@@ -16,7 +16,7 @@ body {
 label {
     text-align: right;
     display: inline-block;
-    width: 14em;
+    width: 15em;
     padding-right: 0.5em;
 }
 
@@ -40,15 +40,15 @@ input {
 
     <body>
         <div id="sample-data">
-            <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100"><br>
-            <label>Precisão (casas):</label><input id="precision" type="number" value="4" min="0"><br>
+            <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
+            <label>Precisão (casas):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
             <br>
-            <label>Média:</label><input id="mean" value="0" type="number" step="any" ><br>
-            <label>Desvio padrão:</label><input id="stdev" value="1" type="number" step="any" ><br>
-            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0"><br>
-            <label><input type="checkbox" id="population-n-known" onchange="document.getElementById('population-n').disabled = !this.checked;">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" disabled><br>
-
-            <button id="update-button" onclick="update();">Atualizar</button>
+            <label>Média observada:</label><input id="mean" value="0" type="number" step="any" onchange="update()"><br>
+            <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="sample" checked>Desvio padrão amostral:</label><input id="stdev" value="1" type="number" step="any" onchange="update()"><br>
+            <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="population">Desvio padrão populacional:</label><input id="population-stdev" value="1" type="number" step="any" onchange="update()"><br>
+            <br>
+            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
+            <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
         </div>
 
         <div class="result">
@@ -63,8 +63,8 @@ input {
             <h2>Poder do Teste</h2>
 
             <label>Média em H0:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
-            Poder do teste (unilateral): <span id="power"></span>%
-            <br>
+            X crítico: <span id="x-critical"></span><br>
+            Poder do teste (unilateral): <span id="power"></span>%<br>
             <br>
             <label>Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updatePower()">
             <br>
@@ -82,10 +82,21 @@ function set(elementId, value) {
     document.getElementById(elementId).innerHTML = value.toFixed(precision);
 }
 
+function updateFormFields() {
+    var populationKnown = document.getElementsByName("stdev-known")[1].checked;
+    document.getElementById("stdev").disabled = populationKnown;
+    document.getElementById("population-stdev").disabled = !populationKnown;
+
+    document.getElementById("population-n").disabled = !document.getElementById("population-n-known").checked;
+
+    update();
+}
+
 var confidence,
     precision,
     mean,
     stdev,
+    distribution,
     n,
     populationN;
 
@@ -93,13 +104,19 @@ function update() {
     confidence = get("confidence") / 100;
     precision = get("precision");
     mean = get("mean");
-    stdev = get("stdev");
     n = get("n");
     if (document.getElementById("population-n").disabled) {
         populationN = Number.POSITIVE_INFINITY;
     } else {
         populationN = get("population-n");
-    }    
+    }
+    if (document.getElementsByName("stdev-known")[1].checked) {
+        distribution = normal;
+        stdev = get("population-stdev");
+    } else {
+        distribution = studentT;
+        stdev = get("stdev");
+    }
 
     updateConfidenceInterval();
     updatePower();
@@ -109,7 +126,8 @@ function updateConfidenceInterval() {
     set("interval-mean", mean);
 
     var sx = stdev / Math.sqrt(n);
-    var t = aStudentT(1 - confidence, n - 1);
+    var t = a(distribution, 1 - confidence, n - 1);
+
     var width = t * sx;
     if (n > 0.05 * populationN) {
         width *= Math.sqrt((populationN - n) / (populationN - 1));
@@ -123,32 +141,33 @@ function updateConfidenceInterval() {
 function updatePower() {
     var meanH0 = get("mean-h0");
 
-    var tc = aStudentT(2 * (1 - confidence), n - 1);
+    var tc = a(distribution, 2 * (1 - confidence), n - 1);
     if (meanH0 > mean) {
         tc = -tc;
     }
+
     var xCritical = meanH0 + tc * stdev / Math.sqrt(n);
+    set("x-critical", xCritical);
+
     var tbeta = (xCritical - mean) * Math.sqrt(n) / stdev;
-    var beta = studentT(tbeta, n - 1) / 2;
-    var power;
-    // Fix for Student-T being two-tailed.
-    if (tbeta > 0) {
-        power = beta;
-    } else {
-        power = 1 - beta;
+    var beta = distribution(tbeta, n - 1) / 2;
+    // Fix for the distributions being two tailed.
+    if (tbeta < 0) {
+        beta = 1 - beta;
     }
+    var power = 1 - beta;
 
     set("power", power * 100);
 
     var targetPower = get("target-power") / 100;
-    var numUni = aNormal(2 * (1 - confidence), n - 1) + aNormal(2 * (1 - targetPower), n - 1);
-    var numBi = aStudentT(1 - confidence, n - 1) + aStudentT(1 - targetPower, n - 1);
+    var numUni = a(distribution, 2 * (1 - confidence), n - 1) + a(distribution, 2 * (1 - targetPower), n - 1);
+    var numBi = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var dem = Math.abs(mean - meanH0) / stdev;
     set("required-sample-uni", Math.pow(numUni / dem, 2));
     set("required-sample-bi", Math.pow(numBi / dem, 2));
 }
 
-window.onload = update;
+window.onload = updateFormFields;
         </script>
 
         <script>
@@ -211,32 +230,15 @@ function studentT(t, n) {
     }
 }
 
-// Calculates t such that studentT(t, n) == p.
-function aStudentT(p, n) {
+// Calculates t such that distribution(t, n) == p.
+function a(distribution, p, n) {
     var v = 0.5;
     var dv = 0.5;
     var t = 0;
     while (dv > 1e-6) {
         t = 1 / v - 1;
         dv = dv / 2;
-        if (studentT(t, n) > p) {
-            v = v - dv;
-        } else {
-            v = v + dv;
-        }
-    }
-    return t;
-}
-
-// Calculates z such that normal(z) == p.
-function aNormal(p) {
-    var v = 0.5;
-    var dv = 0.5;
-    var t = 0;
-    while (dv > 1e-6) {
-        t = 1 / v - 1;
-        dv = dv / 2;
-        if (normal(t, n) > p) {
+        if (distribution(t, n) > p) {
             v = v - dv;
         } else {
             v = v + dv;
