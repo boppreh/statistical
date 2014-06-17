@@ -56,7 +56,7 @@ body > .result {
     <body>
         <div id="sample-data">
             <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
-            <label>Precisão (casas):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
+            <label>Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
             <br>
             <label>Média observada:</label><input id="mean" value="0" type="number" step="any" onchange="update()"><br>
             <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="sample" checked>Desvio padrão amostral:</label><input id="stdev" value="1" type="number" step="any" onchange="update()"><br>
@@ -64,6 +64,8 @@ body > .result {
             <br>
             <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
             <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
+            <br>
+            <label><input type="checkbox" id="unilateral" onchange="update()">Testes unilaterais</label>
         </div>
         <br>
 
@@ -89,13 +91,11 @@ body > .result {
 
             <label>Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
             X crítico: <span id="x-critical"></span><br>
-            Poder do teste (unilateral): <span id="power"></span>%<br>
+            Poder do teste: <span id="power"></span>%<br>
             <br>
             <label>Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updatePower()">
             <br>
-            Amostras necessárias (unilateral): <span id="required-sample-uni"></span>
-            <br>
-            Amostras necessárias (bilateral): <span id="required-sample-bi"></span>
+            Amostras necessárias: <span id="required-sample"></span>
         </div>
 
         <div class="result">
@@ -149,11 +149,13 @@ var confidence,
     distribution,
     n,
     populationN,
-    sx;
+    sx,
+    tails;
 
 function update() {
     confidence = get("confidence") / 100;
     precision = get("precision");
+    tails = document.getElementById("unilateral").checked ? 1 : 2;
     mean = get("mean");
     n = get("n");
     if (document.getElementsByName("stdev-known")[1].checked) {
@@ -170,7 +172,7 @@ function update() {
         populationN = get("population-n");
         var populationNCorrection = Math.sqrt((populationN - n) / (populationN - 1));
         sx *= populationNCorrection;
-    }
+    }    
 
     updateConfidenceInterval();
     updateSingleMeanTest();
@@ -194,7 +196,7 @@ function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
     var t = Math.abs(mean - expectedMean) / sx;
-    var pValue = distribution(t, n - 1);
+    var pValue = distribution(t, n - 1) * tails;
     var displayPValue = format(pValue * 100);
     var displayAlpha = format((1 - confidence) * 100);
     set("expected-mean-p", displayPValue);
@@ -221,17 +223,15 @@ function updatePower() {
     if (meanH0 < mean) {
         tbeta = -tbeta;
     }
-    var beta = distribution(tbeta, n - 1);
+    var beta = distribution(tbeta, n - 1) * tails;
     var power = 1 - beta;
 
     set("power", power * 100);
 
     var targetPower = get("target-power") / 100;
-    var numUni = a(distribution, 1 - confidence, n - 1) + a(distribution, 1 - targetPower, n - 1);
-    var numBi = a(distribution, (1 - confidence) / 2, n - 1) + a(distribution, 1 - targetPower, n - 1);
+    var num = a(distribution, (1 - confidence) / tails, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var dem = Math.abs(mean - meanH0) / stdev;
-    set("required-sample-uni", Math.pow(numUni / dem, 2));
-    set("required-sample-bi", Math.pow(numBi / dem, 2));
+    set("required-sample", Math.pow(num / dem, 2));
 }
 
 function updateComparison() {
@@ -243,7 +243,7 @@ function updateComparison() {
     var sizeFactor = Math.sqrt(1 / n + 1 / n2);
     var t = Math.abs(mean - mean2) / (Math.sqrt(variance) * sizeFactor);
 
-    var pValue = distribution(t, n + n2 - 2) * 2;
+    var pValue = distribution(t, n + n2 - 2) * tails;
     var displayPValue = format(pValue * 100);
     var displayAlpha = format((1 - confidence) * 100);
     set("comparison-p", displayPValue);
