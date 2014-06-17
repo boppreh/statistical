@@ -78,10 +78,10 @@ body > .result {
         <div class="result">
             <h2>Teste de Uma Média</h2>
 
-            <label>Média esperada:</label><input id="expected-mean" type="number" value="0" step="any" onchange="updateSingleMeanTest()">
+            <label>Média esperada:</label><input id="expected-mean" type="number" value="0" step="any" onchange="updateSingleMeanTest()"><br>
             <br>
             Valor-p: <span id="expected-mean-p"></span>%<br>
-            Resultado: <span id="expected-mean-result"></span>.
+            Resultado: <span id="expected-mean-result"></span>
         </div>
 
         <div class="result">
@@ -98,14 +98,36 @@ body > .result {
             Amostras necessárias (bilateral): <span id="required-sample-bi"></span>
         </div>
 
+        <div class="result">
+            <h2>Teste de Dois Grupos</h2>
+
+            Segundo grupo:
+            <label>Média:</label><input id="second-mean" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
+            <label>Desvio padrão:</label><input id="second-stdev" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
+            <label>Tamanho da amostra:</label><input id="second-n" type="number" value="20" step="1" onchange="updateComparison()"><br>
+            <p>
+
+            Valor-p: <span id="comparison-p"></span>%<br>
+            Resultado: <span id="comparison-result"></span>
+        </div>
+
         <script>
+function format(value) {
+    if (typeof value == "number") {
+        return value.toFixed(precision).replace(/\.?0+$/, '');
+    } else {
+        return value;
+    }
+}
+
 function get(variableName) {
     return Number(document.getElementById(variableName).value);
 }
 
-function set(elementId, value) {
-    if (typeof value == "number") {
-        value = value.toFixed(precision);
+function set(elementId, value, includesStyle) {
+    value = format(value);
+    if (!includesStyle) {
+        value = "<strong>" + value + "</strong>";
     }
     document.getElementById(elementId).innerHTML = value;
 }
@@ -153,6 +175,7 @@ function update() {
     updateConfidenceInterval();
     updateSingleMeanTest();
     updatePower();
+    updateComparison();
 }
 
 
@@ -171,15 +194,15 @@ function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
     var t = Math.abs(mean - expectedMean) / sx;
-    var pValue = distribution(t, n);
-    var displayPValue = (pValue * 100).toFixed(precision);
-    var displayAlpha = ((1 - confidence) * 100).toFixed(precision);
+    var pValue = distribution(t, n - 1);
+    var displayPValue = format(pValue * 100);
+    var displayAlpha = format((1 - confidence) * 100);
     set("expected-mean-p", displayPValue);
 
     if (pValue < 1 - confidence) {
-        set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>");
+        set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. É diferente da média esperada.", true);
     } else {
-        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>");
+        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não é diferente da média esperada.", true);
     }
 }
 
@@ -209,6 +232,27 @@ function updatePower() {
     var dem = Math.abs(mean - meanH0) / stdev;
     set("required-sample-uni", Math.pow(numUni / dem, 2));
     set("required-sample-bi", Math.pow(numBi / dem, 2));
+}
+
+function updateComparison() {
+    var mean2 = get("second-mean");
+    var stdev2 = get("second-stdev");
+    var n2 = get("second-n");
+
+    var variance = ((n - 1) * stdev * stdev + (n2 - 1) * stdev2 * stdev2) / (n + n2 -2);
+    var sizeFactor = Math.sqrt(1 / n + 1 / n2);
+    var t = Math.abs(mean - mean2) / (Math.sqrt(variance) * sizeFactor);
+
+    var pValue = distribution(t, n + n2 - 2) * 2;
+    var displayPValue = format(pValue * 100);
+    var displayAlpha = format((1 - confidence) * 100);
+    set("comparison-p", displayPValue);
+
+    if (pValue < 1 - confidence) {
+        set("comparison-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. Há diferença entre a média dos grupos.", true);
+    } else {
+        set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não há diferença entre a média dos grupos.", true);
+    }
 }
 
 window.onload = updateFormFields;
