@@ -126,7 +126,7 @@ function updateConfidenceInterval() {
     set("interval-mean", mean);
 
     var sx = stdev / Math.sqrt(n);
-    var t = a(distribution, 1 - confidence, n - 1);
+    var t = a(distribution, (1 - confidence) / 2, n - 1);
 
     var width = t * sx;
     if (n > 0.05 * populationN) {
