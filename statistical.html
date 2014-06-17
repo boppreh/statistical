@@ -13,6 +13,11 @@ body {
     color: #444;
 }
 
+h2 {
+    margin-top: 2em;
+    text-align: center;
+}
+
 label {
     text-align: right;
     display: inline-block;
@@ -20,12 +25,21 @@ label {
     padding-right: 0.5em;
 }
 
-input {
+#sample-data input {
     width: auto;
 }
 
-.result {
+.result input {
+    width: 6em;
+}
 
+body > .result {
+    vertical-align: top;
+}
+
+.result {
+    display: inline-block;
+    margin: 2em;
 }
 
 #sample-data {
@@ -50,6 +64,7 @@ input {
             <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
             <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
         </div>
+        <br>
 
         <div class="result">
             <h2>Intervalo de Confiança</h2>
