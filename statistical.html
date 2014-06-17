@@ -60,6 +60,15 @@ input {
         </div>
 
         <div class="result">
+            <h2>Teste de Uma Média</h2>
+
+            <label>Média esperada:</label><input id="expected-mean" type="number" value="0.1" step="any" onchange="updatePower()">
+            <br>
+            Valor-p: <span id="expected-mean-p"></span>%<br>
+            Resultado: <span id="expected-mean-result"></span>.
+        </div>
+
+        <div class="result">
             <h2>Poder do Teste</h2>
 
             <label>Média em H0:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
@@ -79,7 +88,10 @@ function get(variableName) {
 }
 
 function set(elementId, value) {
-    document.getElementById(elementId).innerHTML = value.toFixed(precision);
+    if (typeof value == "number") {
+        value = value.toFixed(precision);
+    }
+    document.getElementById(elementId).innerHTML = value;
 }
 
 function updateFormFields() {
@@ -119,7 +131,24 @@ function update() {
     }
 
     updateConfidenceInterval();
+    updateSingleMeanTest();
     updatePower();
+}
+
+function updateSingleMeanTest() {
+    var expectedMean = get("expected-mean");
+
+    var t = (mean - expectedMean) * Math.sqrt(n) / stdev;
+    var pValue = distribution(t, n);
+    var displayPValue = (pValue * 100).toFixed(precision);
+    var displayAlpha = ((1 - confidence) * 100).toFixed(precision);
+    set("expected-mean-p", displayPValue);
+
+    if (pValue < 1 - confidence) {
+        set("expected-mean-result", displayPValue + "&lt;" + displayAlpha + " portanto <strong>rejeita-se H0</strong>");
+    } else {
+        set("expected-mean-result", displayPValue + "&gt;" + displayAlpha + " portanto <strong>aceita-se H0</strong>");
+    }
 }
 
 function updateConfidenceInterval() {
