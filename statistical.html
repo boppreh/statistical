@@ -40,6 +40,7 @@ body > .result {
 .result {
     display: inline-block;
     margin: 2em;
+    width: 22em;
 }
 
 #sample-data {
@@ -77,7 +78,7 @@ body > .result {
         <div class="result">
             <h2>Teste de Uma Média</h2>
 
-            <label>Média esperada:</label><input id="expected-mean" type="number" value="0.1" step="any" onchange="updateSingleMeanTest()">
+            <label>Média esperada:</label><input id="expected-mean" type="number" value="0" step="any" onchange="updateSingleMeanTest()">
             <br>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>.
@@ -86,7 +87,7 @@ body > .result {
         <div class="result">
             <h2>Poder do Teste</h2>
 
-            <label>Média em H0:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
+            <label>Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
             X crítico: <span id="x-critical"></span><br>
             Poder do teste (unilateral): <span id="power"></span>%<br>
             <br>
