@@ -99,7 +99,7 @@ body > .result {
         </div>
 
         <div class="result">
-            <h2>Teste de Dois Grupos</h2>
+            <h2>Teste de Duas Médias</h2>
 
             Segundo grupo:
             <label>Média:</label><input id="second-mean" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
@@ -204,7 +204,7 @@ function updateSingleMeanTest() {
     if (pValue < 1 - confidence) {
         set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. É diferente da média esperada.", true);
     } else {
-        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não é diferente da média esperada.", true);
+        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não foi detectada diferença da média esperada.", true);
     }
 }
 
@@ -251,7 +251,7 @@ function updateComparison() {
     if (pValue < 1 - confidence) {
         set("comparison-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. Há diferença entre a média dos grupos.", true);
     } else {
-        set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não há diferença entre a média dos grupos.", true);
+        set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não foi detectada diferença entre a média dos grupos.", true);
     }
 }
 
