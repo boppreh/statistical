@@ -52,7 +52,7 @@ body > .result {
     display: inline-block;
 }
 
-#load-button {
+#load-button, #load-paired-button{
     width: 100%;
 }
         </style>
@@ -74,6 +74,7 @@ body > .result {
             <label title="Desvio padrão dos dados amostrados (ou da população se indicado acima).">Desvio padrão:</label><input id="stdev" value="15" type="number" step="any" onchange="updateFormFields()"><br>
             <label title="Número de elementos na amostra.">Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" onchange="updateFormFields()"><br>
             <button id="load-button" onclick="loadData()">Carregar dados</button><br>
+            <button id="load-paired-button" onclick="loadPairedData()">Carregar diferença de dados pareados</button><br>
         </div>
         <br>
 
@@ -144,21 +145,14 @@ function set(elementId, value, includesStyle) {
     document.getElementById(elementId).innerHTML = value;
 }
 
-function loadData() {
-    var allData;
-    if (isProportion) {
-        allData = prompt("Insira os dados binários (1 ou 0) separados por espaço.");
-    } else {
-        allData = prompt("Insira os dados numéricos separados por espaço.");
-    }
+function promptData(message) {
+    var allData = prompt(message);
     if (!allData) {
         return;
     }
-
     var strData = allData.replace(/,/g, ".").split(/\s+/);
     var data = [];
-    var n = strData.length;
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; i < strData.length; i++) {
         var value = Number(strData[i]);
         if (isNaN(value)) {
             alert("Erro ao ler o valor " + strData[i]);
@@ -166,7 +160,36 @@ function loadData() {
         }
         data[i] = value;
     }
+    return data;
+}
 
+function loadPairedData() {
+    var dataA = promptData("Insira os dados numéricos do primeiro grupo separados por espaço.");
+    var dataB = promptData("Insira os dados numéricos do segundo grupo separados por espaço.");
+    if (dataA.length != dataB.length) {
+        alert("As amostras precisam ser do mesmo tamanho.")
+        return;
+    }
+
+    var difData = [];
+    for (var i = 0; i < dataA.length; i++) {
+        difData[i] = dataA[i] - dataB[i];
+    }
+    setData(difData);
+    set("expected-mean", 0);
+    set("mean-h0", 0);
+}
+
+function loadData() {
+    if (isProportion) {
+        setData(promptData("Insira os dados binários (1 ou 0) separados por espaço."));
+    } else {
+        setData(promptData("Insira os dados numéricos separados por espaço."));
+    }
+}
+
+function setData(data) {
+    var n = data.length;
     var sum = 0;
     for (var i = 0; i < n; i++) {
         sum += data[i];
@@ -179,7 +202,6 @@ function loadData() {
         }
     }
 
-    
     var stdev = Math.sqrt(squaredDifs / (n - 1));
     document.getElementById("mean").value = mean;
     document.getElementById("stdev").value = stdev;
@@ -203,11 +225,13 @@ function updateFormFields(browserNavigating) {
 
     if (document.getElementById("proportion").checked) {
         document.getElementById("stdev").disabled = true;
+        document.getElementById("load-paired-button").disabled = true;
         document.getElementById("mean").max = 1.0;
         document.getElementById("mean").min= 0.0;
         document.getElementById("mean").step = "any";
     } else {
         document.getElementById("stdev").disabled = false;
+        document.getElementById("load-paired-button").disabled = false;
         document.getElementById("mean").max = "";
         document.getElementById("mean").min = "";
         document.getElementById("mean").step = "any";
