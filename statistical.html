@@ -270,7 +270,10 @@ function updateSingleMeanTest() {
 
     var pValue;
     if (isProportion) {
-        pValue = binomial(expectedMean, mean * n, n) * tails;
+        if (mean < 0.5) {
+            mean = 1 - mean;
+        }
+        pValue = Math.min(1, binomial(expectedMean, mean * n, n) * tails);
     } else {
         var t = Math.abs(mean - expectedMean) / sx;
         pValue = distribution(t, n - 1) * tails;
@@ -365,17 +368,17 @@ function binomialEquals(p, k, n) {
 }
 
 function binomial(p, k, n) {
-    if (n * p >= 5 && n * (1 - p) >= 5) {
+    if (n * p >= 5 && n * (1 - p) >= 5 && n >= 30) {
         var num = k / n - p;
         var dem = Math.sqrt(p * (1 - p) / n);
-        return 1 - normal(num / dem);
+        return normal(num / dem);
     }
 
     var total = 0;
-    for (var i = k + 1; i <= n; i++) {
+    for (var i = k; i <= n; i++) {
         total += binomialEquals(p, i, n);
     }
-    return 1 - total;
+    return total;
 }
 
 
