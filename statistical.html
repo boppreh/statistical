@@ -26,7 +26,8 @@ label {
 }
 
 textarea {
-    height: 24em;
+    width: 100%;
+    height: 10em;
 }
 
 #sample-data input {
@@ -58,10 +59,11 @@ body > .result {
     </head>
 
     <body>
-        <textarea id="text" onchange="updateFormFields()"></textarea>
         <div id="sample-data">
+            <textarea id="text" onchange="updateFormFields()"></textarea><br>
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="updateFormFields()"><br>
             <label title="Mostra ou esconde o campo com o enunciado do problema."><input type="checkbox" id="show-text" onchange="updateFormFields()">Incluir enunciado</label><br>
+            <br>
             <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="updateFormFields()"><br>
             <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="updateFormFields()">Usar testes unilaterais</label><br>
             <label title="Indica se as estatísticas são de uma proporção, como a porcentagem de amostras que passaram em um teste."><input type="checkbox" id="proportion" onchange="updateFormFields()">Média é uma proporção</label><br>
@@ -217,7 +219,7 @@ function updateFormFields(browserNavigating) {
         var url = "?";
         var inputs = document.getElementsByTagName("input");
         for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].checked !== undefined) {
+            if (isNaN(inputs[i].value)) {
                 url += inputs[i].id + "=" + inputs[i].checked + "&";
             } else {
                 url += inputs[i].id + "=" + inputs[i].value + "&";
@@ -373,7 +375,6 @@ window.onload = function () {
     var regex = new RegExp(/([\w-]+)=([^&$]+)/g);
     var match;
     while((match = regex.exec(location.search)) !== null) {
-        console.log(match);
         if (match[2] === "true" || match[2] === "false") {
             document.getElementById(match[1]).checked = match[2] === "true";
         } else if (isNaN(match[2])) {
