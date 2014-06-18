@@ -358,9 +358,19 @@ window.onload = function () {
     updateFormFields(true);
 };
 
-window.onpopstate = function (e) {
-    window.onload()
+window.onpopstate = function (event) {
+    window.onload();
 };
+
+document.onkeydown = function (event) {
+    if (event.keyCode === 90 && event.ctrlKey && event.shiftKey) {
+        window.history.forward();
+    } else if (event.keyCode === 90 && event.ctrlKey) {
+        window.history.back();
+    } else if (event.keyCode === 89 && event.ctrlKey) {
+        window.history.forward();
+    }
+}
         </script>
 
 
