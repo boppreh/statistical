@@ -25,6 +25,10 @@ label {
     padding-right: 0.5em;
 }
 
+textarea {
+    height: 24em;
+}
+
 #sample-data input {
     width: auto;
 }
@@ -54,8 +58,10 @@ body > .result {
     </head>
 
     <body>
+        <textarea id="text"></textarea>
         <div id="sample-data">
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="updateFormFields()"><br>
+            <label title="Mostra ou esconde o campo com o enunciado do problema."><input type="checkbox" id="show-text" onchange="updateFormFields()">Incluir enunciado</label><br>
             <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="updateFormFields()"><br>
             <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="updateFormFields()">Usar testes unilaterais</label><br>
             <label title="Indica se as estatísticas são de uma proporção, como a porcentagem de amostras que passaram em um teste."><input type="checkbox" id="proportion" onchange="updateFormFields()">Média é uma proporção</label><br>
@@ -180,8 +186,18 @@ function loadData() {
     updateFormFields();
 }
 
+function utf8_to_b64(str) {
+    return window.btoa(encodeURIComponent( escape( str )));
+}
+
+function b64_to_utf8(str) {
+    return unescape(decodeURIComponent(window.atob( str )));
+}
+
 function updateFormFields(browserNavigating) {
     document.getElementById("population-n").disabled = !document.getElementById("population-n-known").checked;
+
+    document.getElementById("text").style.display = document.getElementById("show-text").checked ? "" : "none";
 
     if (document.getElementById("proportion").checked) {
         document.getElementById("stdev").disabled = true;
@@ -201,10 +217,15 @@ function updateFormFields(browserNavigating) {
         var url = "?";
         var inputs = document.getElementsByTagName("input");
         for (var i = 0; i < inputs.length; i++) {
-            url += inputs[i].id + "=" + inputs[i].value + "&";
+            if (inputs[i].checked !== undefined) {
+                url += inputs[i].id + "=" + inputs[i].checked + "&";
+            } else {
+                url += inputs[i].id + "=" + inputs[i].value + "&";
+            }
         }
+        url += "text=" + utf8_to_b64(document.getElementById("text").value)
         window.history.pushState(url, "", url);
-    }    
+    }
 }
 
 var confidence,
@@ -349,10 +370,17 @@ function updateComparison() {
 }
 
 window.onload = function () {
-    var regex = new RegExp(/([\w-]+)=([-0-9.,]+)/g);
+    var regex = new RegExp(/([\w-]+)=([^&$]+)/g);
     var match;
-    while((match = regex.exec(location.search)) !== null){
-        document.getElementById(match[1]).value = Number(match[2]);
+    while((match = regex.exec(location.search)) !== null) {
+        console.log(match);
+        if (match[2] === "true" || match[2] === "false") {
+            document.getElementById(match[1]).checked = match[2] === "true";
+        } else if (isNaN(match[2])) {
+            document.getElementById(match[1]).value = b64_to_utf8(match[2]);
+        } else {
+            document.getElementById(match[1]).value = match[2];
+        }
     }
 
     updateFormFields(true);
