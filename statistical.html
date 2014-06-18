@@ -301,7 +301,7 @@ function updatePower() {
     if (meanH0 < mean) {
         tbeta = -tbeta;
     }
-    console.log(tbeta)
+
     var beta = distribution(tbeta, n - 1) * tails;
     var power = 1 - beta;
 
