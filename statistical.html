@@ -14,7 +14,8 @@ body {
 }
 
 h2 {
-    margin-top: 2em;
+    display: inline-block;
+    margin-top: 0;
     text-align: center;
 }
 
@@ -43,9 +44,10 @@ body > .result {
 }
 
 .result {
+    margin-top: 2em;
     display: inline-block;
     margin: 1em;
-    width: 24em;
+    width: 22em;
 }
 
 #sample-data {
@@ -59,7 +61,8 @@ body > .result {
     </head>
 
     <body>
-        <div id="sample-data">
+        <details id="sample-data">
+            <summary>Dados de entrada</summary>
             <textarea id="text" onchange="updateFormFields()"></textarea><br>
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="updateFormFields()"><br>
             <label title="Mostra ou esconde o campo com o enunciado do problema."><input type="checkbox" id="show-text" onchange="updateFormFields()">Incluir enunciado</label><br>
@@ -72,14 +75,15 @@ body > .result {
             <br>
             <label title="Média observada dos dados amostrados.">Média:</label><input id="mean" value="174" type="number" step="any" onchange="updateFormFields()"><br>
             <label title="Desvio padrão dos dados amostrados (ou da população se indicado acima).">Desvio padrão:</label><input id="stdev" value="15" type="number" step="any" onchange="updateFormFields()"><br>
-            <label title="Número de elementos na amostra.">Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" onchange="updateFormFields()"><br>
+            <label title="Número de elementos na amostra.">Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" step="1" onchange="updateFormFields()"><br>
             <button id="load-button" onclick="loadData()">Carregar dados</button><br>
             <button id="load-paired-button" onclick="loadPairedData()">Carregar diferença de dados pareados</button><br>
-        </div>
+        </details>
         <br>
 
-        <div class="result">
-            <h2>Intervalo de Confiança</h2>
+        <details class="result">
+            <summary><h2>Intervalo de Confiança</h2></summary>
+            <br>
 
             <span id="interval-mean">0</span> ± <span id="interval-width">1</span>
             <br>
@@ -87,19 +91,21 @@ body > .result {
             <p>
             <label title="Maior variação aceitável, para cálculo do tamanho da próxima amostra.">Erro máximo desejado:</label><input id="max-error" type="number" value="5" step="any" onchange="updateFormFields()"><br>
             Amostras necessárias: <span id="required-n">0</span>.
-        </div>
+        </details>
 
-        <div class="result">
-            <h2>Teste de Uma Média</h2>
+        <details class="result">
+            <summary><h2>Teste de Uma Média</h2></summary>
+            <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateFormFields()"><br>
             <br>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>
-        </div>
+        </details>
 
-        <div class="result">
-            <h2>Poder do Teste</h2>
+        <details class="result">
+            <summary><h2>Poder do Teste</h2></summary>
+            <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updateFormFields()"><br>
             X crítico: <span id="x-critical"></span><br>
@@ -108,10 +114,11 @@ body > .result {
             <label title="Probabilidade desejada de rejeitar uma hipótese nula falsa.">Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updateFormFields()">
             <br>
             Amostras necessárias: <span id="required-sample"></span>
-        </div>
+        </details>
 
-        <div class="result">
-            <h2>Teste de Duas Médias</h2>
+        <details class="result">
+            <summary><h2>Teste de Duas Médias</h2></summary>
+            <br>
 
             Segundo grupo:<br>
             <label title="Média observada na amostra do segundo grupo.">Média:</label><input id="second-mean" type="number" value="171" step="any" onchange="updateFormFields()"><br>
@@ -122,7 +129,7 @@ body > .result {
             Valor-p: <span id="comparison-p"></span>%<br>
             Resultado: <span id="comparison-result"></span><br>
             <a id="comparison-link" href="">Análise das diferenças</a>.
-        </div>
+        </details>
 
         <script>
 function format(value) {
