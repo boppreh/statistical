@@ -73,8 +73,11 @@ body > .result {
             <h2>Intervalo de Confiança</h2>
 
             <span id="interval-mean">0</span> ± <span id="interval-width">1</span>
-            <p>
+            <br>
             Entre <span id="interval-min">0</span> e <span id="interval-max">1</span>
+            <p>
+            <label title="Erro máximo desejado para cálculo de tamanho de amostra.">Erro máximo:</label><input id="max-error" type="number" value="5" step="any" onchange="updateConfidenceInterval()"><br>
+            Amostras necessárias: <span id="required-n">0</span>.
         </div>
 
         <div class="result">
@@ -252,6 +255,14 @@ function updateConfidenceInterval() {
     set("interval-width",  width);
     set("interval-min",  mean - width);
     set("interval-max",  mean + width);
+
+    var maxError = get("max-error");
+    var n0 = Math.pow(t * stdev / maxError, 2);
+    if (populationN === Number.POSITIVE_INFINITY) {
+        set("required-n", n0);
+    } else {
+        set("required-n", populationN * n0 / (populationN + n0));
+    }    
 }
 
 function updateSingleMeanTest() {
