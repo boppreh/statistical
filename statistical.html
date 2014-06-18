@@ -86,11 +86,13 @@ body > .result {
             <summary><h2>Intervalo de Confiança</h2></summary>
             <br>
 
-            <span id="interval-mean">0</span> ± <span id="interval-width">1</span>
-            <br>
-            Entre <span id="interval-min">0</span> e <span id="interval-max">1</span>
+            <span class="work">t: <span id="interval-t"></span><br></span>
+            Média real: <span id="interval-mean">0</span> ± <span id="interval-width">1</span><br>
+            (<span id="interval-min">0</span> a <span id="interval-max">1</span>)
             <p>
             <label title="Maior variação aceitável, para cálculo do tamanho da próxima amostra.">Erro máximo desejado:</label><input id="max-error" type="number" value="5" step="any" onchange="updateFormFields()"><br>
+            <span class="work">n<sub>0</sub>: <span id="interval-n0"></span><br></span>
+            <span class="work"><span id="interval-population-size"></span><br></span>
             Amostras necessárias: <span id="required-n">0</span>.
         </details>
 
@@ -99,7 +101,7 @@ body > .result {
             <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateFormFields()"><br>
-            <br>
+            <span class="work">t: <span id="expected-mean-t"></span><br></span>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>
         </details>
@@ -109,7 +111,10 @@ body > .result {
             <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updateFormFields()"><br>
+            <span class="work">t crítico: <span id="t-critical"></span><br></span>
             <span class="work">X crítico: <span id="x-critical"></span><br></span>
+            <span class="work">t beta: <span id="t-beta"></span><br></span>
+            <span class="work">beta: <span id="beta"></span>%<br></span>
             Poder do teste: <span id="power"></span>%<br>
             <br>
             <label title="Probabilidade desejada de rejeitar uma hipótese nula falsa.">Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updateFormFields()">
@@ -127,6 +132,9 @@ body > .result {
             <label title="Número de elementos na amostra do segundo grupo.">Tamanho da amostra:</label><input id="second-n" type="number" value="15" step="1" onchange="updateFormFields()"><br>
             <p>
 
+            <span class="work">Variância agrupada: <span id="comparison-variance"></span><br></span>
+            <span class="work">Fator de tamanhos: <span id="comparison-sizes"></span><br></span>
+            <span class="work">t: <span id="comparison-t"></span><br></span>
             Valor-p: <span id="comparison-p"></span>%<br>
             Resultado: <span id="comparison-result"></span><br>
             <a id="comparison-link" href="">Análise das diferenças</a>.
@@ -321,6 +329,8 @@ function updateConfidenceInterval() {
     set("interval-mean", mean);
 
     var t = a(distribution, (1 - confidence) / 2, n - 1);
+    set("interval-t",  t);
+
     var width = t * sx;
 
     set("interval-width",  width);
@@ -329,9 +339,12 @@ function updateConfidenceInterval() {
 
     var maxError = get("max-error");
     var n0 = Math.pow(t * stdev / maxError, 2);
+    set("interval-n0",  n0);
     if (populationN === Number.POSITIVE_INFINITY) {
+        set("interval-population-size", "Não se aplica correção porque a população é desconhecida ou infinita.")
         set("required-n", n0);
     } else {
+        set("interval-population-size", "Aplica-se correção porque a população é conhecida.")
         set("required-n", populationN * n0 / (populationN + n0));
     }    
 }
@@ -344,9 +357,11 @@ function updateSingleMeanTest() {
         if (mean < 0.5) {
             mean = 1 - mean;
         }
+        set("expected-mean-t", "Não se aplica.");
         pValue = Math.min(1, binomial(expectedMean, mean * n, n) * tails);
     } else {
         var t = Math.abs(mean - expectedMean) / sx;
+        set("expected-mean-t", t);
         pValue = distribution(t, n - 1) * tails;
     }
     var displayPValue = format(pValue * 100);
@@ -367,6 +382,7 @@ function updatePower() {
     if (meanH0 > mean) {
         tc = -tc;
     }
+    set("t-critical", tc);
 
     var xCritical = meanH0 + tc * sx;
     set("x-critical", xCritical);
@@ -375,10 +391,12 @@ function updatePower() {
     if (meanH0 < mean) {
         tbeta = -tbeta;
     }
+    set("t-beta", tbeta);
 
-    var beta = distribution(tbeta, n - 1) * tails;
+    var beta = Math.min(1, distribution(tbeta, n - 1) * tails);
+    set("beta", beta * 100);
+
     var power = 1 - beta;
-
     set("power", power * 100);
 
     var targetPower = get("target-power") / 100;
@@ -393,8 +411,13 @@ function updateComparison() {
     var n2 = get("second-n");
 
     var variance = ((n - 1) * stdev * stdev + (n2 - 1) * stdev2 * stdev2) / (n + n2 -2);
+    set("comparison-variance", variance);
+
     var sizeFactor = Math.sqrt(1 / n + 1 / n2);
+    set("comparison-sizes", sizeFactor);
+
     var t = Math.abs(mean - mean2) / (Math.sqrt(variance) * sizeFactor);
+    set("comparison-t", t);
 
     var pValue = distribution(t, n + n2 - 2) * tails;
     var displayPValue = format(pValue * 100);
