@@ -280,9 +280,9 @@ function updateSingleMeanTest() {
     set("expected-mean-p", displayPValue);
 
     if (pValue < 1 - confidence) {
-        set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. É diferente da média esperada.", true);
+        set("expected-mean-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H<sub>0</sub></strong>. É diferente da média esperada.", true);
     } else {
-        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não foi detectada diferença da média esperada.", true);
+        set("expected-mean-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H<sub>0</sub></strong>. Não foi detectada diferença da média esperada.", true);
     }
 }
 
@@ -324,9 +324,9 @@ function updateComparison() {
     set("comparison-p", displayPValue);
 
     if (pValue < 1 - confidence) {
-        set("comparison-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H0</strong>. Há diferença entre a média dos grupos.", true);
+        set("comparison-result", displayPValue + "% &lt; " + displayAlpha + "% portanto <strong>rejeita-se H<sub>0</sub></strong>. Há diferença entre a média dos grupos.", true);
     } else {
-        set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não foi detectada diferença entre a média dos grupos.", true);
+        set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H<sub>0</sub></strong>. Não foi detectada diferença entre a média dos grupos.", true);
     }
 
     document.getElementById("comparison-link").href = "?mean=" + (mean - mean2) + "&stdev=" + Math.sqrt(variance) + "&n=" + (n + n2) + "&expected-mean=0&mean-h0=0";
