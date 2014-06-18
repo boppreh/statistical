@@ -55,15 +55,15 @@ body > .result {
 
     <body>
         <div id="sample-data">
-            <label>Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
-            <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
-            <label><input type="checkbox" id="unilateral" onchange="update()">Usar testes unilaterais</label><br>
-            <label><input type="checkbox" id="population-stdev-known" onchange="update()">Desvio padrão é populacional</label><br>
-            <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
+            <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
+            <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
+            <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="update()">Usar testes unilaterais</label><br>
+            <label title="Se o desvio padrão fornecido é o desvio padrão real da população."><input type="checkbox" id="population-stdev-known" onchange="update()">Desvio padrão é populacional</label><br>
+            <label title="Tamanho total da população, se conhecido."><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
             <br>
-            <label>Média observada:</label><input id="mean" value="174" type="number" step="any" onchange="update()"><br>
-            <label>Desvio padrão:</label><input id="stdev" value="15" type="number" step="any" onchange="update()"><br>
-            <label>Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
+            <label title="Média observada dos dados amostrados.">Média:</label><input id="mean" value="174" type="number" step="any" onchange="update()"><br>
+            <label title="Desvio padrão dos dados amostrados (ou da população se indicado acima).">Desvio padrão:</label><input id="stdev" value="15" type="number" step="any" onchange="update()"><br>
+            <label title="Número de elementos na amostra.">Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
             <button id="load-button" onclick="loadData()">Carregar dados</button><br>
         </div>
         <br>
@@ -79,7 +79,7 @@ body > .result {
         <div class="result">
             <h2>Teste de Uma Média</h2>
 
-            <label>Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateSingleMeanTest()"><br>
+            <label title="Média esperada caso a amostra fosse aleatória.">Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateSingleMeanTest()"><br>
             <br>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>
@@ -88,11 +88,11 @@ body > .result {
         <div class="result">
             <h2>Poder do Teste</h2>
 
-            <label>Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updatePower()"><br>
+            <label title="Média esperada caso a amostra fosse aleatória.">Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updatePower()"><br>
             X crítico: <span id="x-critical"></span><br>
             Poder do teste: <span id="power"></span>%<br>
             <br>
-            <label>Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updatePower()">
+            <label title="Probabilidade desejada de rejeitar uma hipótese nula falsa.">Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updatePower()">
             <br>
             Amostras necessárias: <span id="required-sample"></span>
         </div>
@@ -101,9 +101,9 @@ body > .result {
             <h2>Teste de Duas Médias</h2>
 
             Segundo grupo:<br>
-            <label>Média:</label><input id="second-mean" type="number" value="171" step="any" onchange="updateComparison()"><br>
-            <label>Desvio padrão:</label><input id="second-stdev" type="number" value="12" step="any" onchange="updateComparison()"><br>
-            <label>Tamanho da amostra:</label><input id="second-n" type="number" value="15" step="1" onchange="updateComparison()"><br>
+            <label title="Média observada na amostra do segundo grupo.">Média:</label><input id="second-mean" type="number" value="171" step="any" onchange="updateComparison()"><br>
+            <label title="Desvio padrão observado na amostra do segundo grupo.">Desvio padrão:</label><input id="second-stdev" type="number" value="12" step="any" onchange="updateComparison()"><br>
+            <label title="Número de elementos na amostra do segundo grupo.">Tamanho da amostra:</label><input id="second-n" type="number" value="15" step="1" onchange="updateComparison()"><br>
             <p>
 
             Valor-p: <span id="comparison-p"></span>%<br>
