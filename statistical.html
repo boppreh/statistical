@@ -58,6 +58,7 @@ body > .result {
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
             <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
             <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="update()">Usar testes unilaterais</label><br>
+            <label title="Indica se as estatísticas são de uma proporção, como a porcentagem de amostras que passaram em um teste."><input type="checkbox" id="proportion" onchange="updateFormFields()">Valores de proporção</label><br>
             <label title="Se o desvio padrão fornecido é o desvio padrão real da população."><input type="checkbox" id="population-stdev-known" onchange="update()">Desvio padrão é populacional</label><br>
             <label title="Tamanho total da população, se conhecido."><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
             <br>
@@ -133,7 +134,12 @@ function set(elementId, value, includesStyle) {
 }
 
 function loadData() {
-    var allData = prompt("Cole os dados numéricos separados por espaço.");
+    var allData;
+    if (isProportion) {
+        allData = prompt("Cole os dados binários (1 ou 0) separados por espaço.");
+    } else {
+        allData = prompt("Cole os dados numéricos separados por espaço.");
+    }
     if (!allData) {
         return;
     }
@@ -155,9 +161,11 @@ function loadData() {
         sum += data[i];
     }
     var mean = sum / n;
-    var squaredDifs = 0;
-    for (var i = 0; i < n; i++) {
-        squaredDifs += Math.pow(data[i] - mean, 2);
+    if (!isProportion) {
+        var squaredDifs = 0;
+        for (var i = 0; i < n; i++) {
+            squaredDifs += Math.pow(data[i] - mean, 2);
+        }
     }
 
     
@@ -172,6 +180,18 @@ function loadData() {
 function updateFormFields() {
     document.getElementById("population-n").disabled = !document.getElementById("population-n-known").checked;
 
+    if (document.getElementById("proportion").checked) {
+        document.getElementById("stdev").disabled = true;
+        document.getElementById("mean").max = 1.0;
+        document.getElementById("mean").min= 0.0;
+        document.getElementById("mean").step = "any";
+    } else {
+        document.getElementById("stdev").disabled = false;
+        document.getElementById("mean").max = "";
+        document.getElementById("mean").min = "";
+        document.getElementById("mean").step = "any";
+    }
+
     update();
 }
 
@@ -183,15 +203,23 @@ var confidence,
     n,
     populationN,
     sx,
-    tails;
+    tails,
+    isProportion;
 
 function update() {
+    isProportion = document.getElementById("proportion").checked;
+
     confidence = get("confidence") / 100;
     precision = get("precision");
     tails = document.getElementById("unilateral").checked ? 1 : 2;
     mean = get("mean");
     n = get("n");
-    stdev = get("stdev");
+    if (isProportion) {
+        stdev = Math.sqrt(mean * (1 - mean));
+        document.getElementById("stdev").value = stdev;
+    } else {
+        stdev = get("stdev");
+    }
     sx = stdev / Math.sqrt(n)
 
     if (document.getElementById("population-stdev-known").checked) {
@@ -206,7 +234,7 @@ function update() {
         populationN = get("population-n");
         var populationNCorrection = Math.sqrt((populationN - n) / (populationN - 1));
         sx *= populationNCorrection;
-    }    
+    }
 
     updateConfidenceInterval();
     updateSingleMeanTest();
