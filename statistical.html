@@ -108,7 +108,8 @@ body > .result {
             <p>
 
             Valor-p: <span id="comparison-p"></span>%<br>
-            Resultado: <span id="comparison-result"></span>
+            Resultado: <span id="comparison-result"></span><br>
+            <a id="comparison-link" href="">Análise das diferenças</a>.
         </div>
 
         <script>
@@ -290,9 +291,17 @@ function updateComparison() {
     } else {
         set("comparison-result", displayPValue + "% &gt; " + displayAlpha + "% portanto <strong>aceita-se H0</strong>. Não foi detectada diferença entre a média dos grupos.", true);
     }
+
+    document.getElementById("comparison-link").href = "?mean=" + (mean - mean2) + "&stdev=" + Math.sqrt(variance) + "&n=" + (n + n2) + "&expected-mean=0&mean-h0=0";
 }
 
-window.onload = updateFormFields;
+window.onload = function () {
+    updateFormFields();
+    var regex = new RegExp(/([\w-]+)=([-0-9.,]+)/g);
+    while((match = regex.exec(location.search)) !== null){
+        document.getElementById(match[1]).value = Number(match[2]);
+    }
+};
         </script>
 
         <script>
