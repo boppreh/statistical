@@ -297,7 +297,11 @@ function updatePower() {
     var xCritical = meanH0 + tc * sx;
     set("x-critical", xCritical);
 
-    var tbeta = Math.abs(xCritical - mean) * sx;
+    var tbeta = (xCritical - mean) / sx;
+    if (meanH0 < mean) {
+        tbeta = -tbeta;
+    }
+    console.log(tbeta)
     var beta = distribution(tbeta, n - 1) * tails;
     var power = 1 - beta;
 
