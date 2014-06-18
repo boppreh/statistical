@@ -180,7 +180,7 @@ function loadPairedData() {
 
     var difData = [];
     for (var i = 0; i < dataA.length; i++) {
-        difData[i] = dataA[i] - dataB[i];
+        difData[i] = dataB[i] - dataA[i];
     }
     setData(difData);
     set("expected-mean", 0);
