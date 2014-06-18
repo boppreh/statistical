@@ -268,11 +268,11 @@ function updateConfidenceInterval() {
 function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
-    var t = Math.abs(mean - expectedMean) / sx;
     var pValue;
     if (isProportion) {
         pValue = binomial(expectedMean, mean * n, n) * tails;
     } else {
+        var t = Math.abs(mean - expectedMean) / sx;
         pValue = distribution(t, n - 1) * tails;
     }
     var displayPValue = format(pValue * 100);
@@ -344,8 +344,6 @@ window.onload = function () {
         </script>
 
         <script>
-// Adapted from http://statpages.org/pdfs.html
-
 var pi = Math.PI,
     piD2 = pi / 2;
 
@@ -363,12 +361,21 @@ function binomialEquals(p, k, n) {
 }
 
 function binomial(p, k, n) {
+    if (n * p >= 5 && n * (1 - p) >= 5) {
+        var num = k / n - p;
+        var dem = Math.sqrt(p * (1 - p) / n);
+        return 1 - normal(num / dem);
+    }
+
     var total = 0;
     for (var i = k + 1; i <= n; i++) {
         total += binomialEquals(p, i, n);
     }
     return 1 - total;
 }
+
+
+// Adapted from http://statpages.org/pdfs.html
 
 function chiSq(x, n) {
     if (x > 1000 | n > 1000) {
