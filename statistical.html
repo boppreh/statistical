@@ -55,16 +55,15 @@ body > .result {
 
     <body>
         <div id="sample-data">
-            <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
             <label>Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
-            <label><input type="checkbox" id="unilateral" onchange="update()">Testes unilaterais</label><br>
-            <br>
-            <label>Média observada:</label><input id="mean" value="0" type="number" step="any" onchange="update()"><br>
-            <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="sample" checked>Desvio padrão amostral:</label><input id="stdev" value="1" type="number" step="any" onchange="update()"><br>
-            <label><input type="radio" name="stdev-known" onchange="updateFormFields()" value="population">Desvio padrão populacional:</label><input id="population-stdev" value="1" type="number" step="any" onchange="update()"><br>
-            <br>
-            <label>Tamanho da amostra (n):</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
+            <label>Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
+            <label><input type="checkbox" id="unilateral" onchange="update()">Usar testes unilaterais</label><br>
+            <label><input type="checkbox" id="population-stdev-known" onchange="update()">Desvio padrão é populacional</label><br>
             <label><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
+            <br>
+            <label>Média observada:</label><input id="mean" value="174" type="number" step="any" onchange="update()"><br>
+            <label>Desvio padrão:</label><input id="stdev" value="15" type="number" step="any" onchange="update()"><br>
+            <label>Tamanho da amostra:</label><input id="n" type="number" value="20" min="0" onchange="update()"><br>
             <button id="load-button" onclick="loadData()">Carregar dados</button><br>
         </div>
         <br>
@@ -80,7 +79,7 @@ body > .result {
         <div class="result">
             <h2>Teste de Uma Média</h2>
 
-            <label>Média esperada:</label><input id="expected-mean" type="number" value="0" step="any" onchange="updateSingleMeanTest()"><br>
+            <label>Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateSingleMeanTest()"><br>
             <br>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>
@@ -89,7 +88,7 @@ body > .result {
         <div class="result">
             <h2>Poder do Teste</h2>
 
-            <label>Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="0.1" step="any" onchange="updatePower()"><br>
+            <label>Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updatePower()"><br>
             X crítico: <span id="x-critical"></span><br>
             Poder do teste: <span id="power"></span>%<br>
             <br>
@@ -102,9 +101,9 @@ body > .result {
             <h2>Teste de Duas Médias</h2>
 
             Segundo grupo:<br>
-            <label>Média:</label><input id="second-mean" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
-            <label>Desvio padrão:</label><input id="second-stdev" type="number" value="0.1" step="any" onchange="updateComparison()"><br>
-            <label>Tamanho da amostra:</label><input id="second-n" type="number" value="20" step="1" onchange="updateComparison()"><br>
+            <label>Média:</label><input id="second-mean" type="number" value="171" step="any" onchange="updateComparison()"><br>
+            <label>Desvio padrão:</label><input id="second-stdev" type="number" value="12" step="any" onchange="updateComparison()"><br>
+            <label>Tamanho da amostra:</label><input id="second-n" type="number" value="15" step="1" onchange="updateComparison()"><br>
             <p>
 
             Valor-p: <span id="comparison-p"></span>%<br>
@@ -166,15 +165,11 @@ function loadData() {
     document.getElementById("mean").value = mean;
     document.getElementById("stdev").value = stdev;
     document.getElementById("n").value = n;
-    document.getElementsByName("stdev-known")[0].checked = true;
+    document.getElementsByName("population-stdev-known").checked = false;
     updateFormFields();
 }
 
 function updateFormFields() {
-    var populationKnown = document.getElementsByName("stdev-known")[1].checked;
-    document.getElementById("stdev").disabled = populationKnown;
-    document.getElementById("population-stdev").disabled = !populationKnown;
-
     document.getElementById("population-n").disabled = !document.getElementById("population-n-known").checked;
 
     update();
@@ -196,14 +191,15 @@ function update() {
     tails = document.getElementById("unilateral").checked ? 1 : 2;
     mean = get("mean");
     n = get("n");
-    if (document.getElementsByName("stdev-known")[1].checked) {
+    stdev = get("stdev");
+    sx = stdev / Math.sqrt(n)
+
+    if (document.getElementsByName("stdev-known").checked) {
         distribution = normal;
-        stdev = get("population-stdev");
     } else {
         distribution = studentT;
-        stdev = get("stdev");
     }
-    sx = stdev / Math.sqrt(n)
+
     if (document.getElementById("population-n").disabled) {
         populationN = Number.POSITIVE_INFINITY;
     } else {
@@ -296,11 +292,12 @@ function updateComparison() {
 }
 
 window.onload = function () {
-    updateFormFields();
     var regex = new RegExp(/([\w-]+)=([-0-9.,]+)/g);
     while((match = regex.exec(location.search)) !== null){
         document.getElementById(match[1]).value = Number(match[2]);
     }
+
+    updateFormFields();
 };
         </script>
 
