@@ -58,7 +58,7 @@ body > .result {
     </head>
 
     <body>
-        <textarea id="text"></textarea>
+        <textarea id="text" onchange="updateFormFields()"></textarea>
         <div id="sample-data">
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="updateFormFields()"><br>
             <label title="Mostra ou esconde o campo com o enunciado do problema."><input type="checkbox" id="show-text" onchange="updateFormFields()">Incluir enunciado</label><br>
