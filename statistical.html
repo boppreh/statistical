@@ -62,10 +62,11 @@ body > .result {
 
     <body>
         <details id="sample-data">
-            <summary>Dados de entrada</summary>
+            <summary><H2>Dados de entrada</h2></summary>
             <textarea id="text" onchange="updateFormFields()"></textarea><br>
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="updateFormFields()"><br>
             <label title="Mostra ou esconde o campo com o enunciado do problema."><input type="checkbox" id="show-text" onchange="updateFormFields()">Incluir enunciado</label><br>
+            <label title="Mostra ou esconde mensagens com soluções parciais do problema.."><input type="checkbox" id="show-work" onchange="updateFormFields()">Mostrar resolução</label><br>
             <br>
             <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="updateFormFields()"><br>
             <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="updateFormFields()">Usar testes unilaterais</label><br>
@@ -108,7 +109,7 @@ body > .result {
             <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updateFormFields()"><br>
-            X crítico: <span id="x-critical"></span><br>
+            <span class="work">X crítico: <span id="x-critical"></span><br></span>
             Poder do teste: <span id="power"></span>%<br>
             <br>
             <label title="Probabilidade desejada de rejeitar uma hipótese nula falsa.">Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updateFormFields()">
@@ -298,8 +299,15 @@ function update() {
         populationN = Number.POSITIVE_INFINITY;
     } else {
         populationN = get("population-n");
-        var populationNCorrection = Math.sqrt((populationN - n) / (populationN - 1));
-        sx *= populationNCorrection;
+        if (populationN * 0.05 < n) {
+            sx *= Math.sqrt((populationN - n) / (populationN - 1));
+        }            
+    }
+
+    var showWork = document.getElementById("show-work").checked;
+    var work = document.getElementsByClassName("work");
+    for (var i = 0; i < work.length; i++) {
+        work[i].style.display = showWork ? "" : "none";
     }
 
     updateConfidenceInterval();
