@@ -144,7 +144,7 @@ function loadData() {
         return;
     }
 
-    var strData = allData.replace(",", ".").split(/\s+/);
+    var strData = allData.replace(/,/g, ".").split(/\s+/);
     var data = [];
     var n = strData.length;
     for (var i = 0; i < n; i++) {
