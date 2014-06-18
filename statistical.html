@@ -58,7 +58,7 @@ body > .result {
             <label title="Número de casas decimais a serem exibidas. Afeta apenas a visualização e não altera os resultados computados.">Precisão (casas decimais):</label><input id="precision" type="number" value="4" min="0" onchange="update()"><br>
             <label title="Nível de significância desejado, 1 - alpha.">Nível de significância (%):</label><input id="confidence" value="95" type="number" step="any" min="0" max="100" onchange="update()"><br>
             <label title="Indica se você quer realizar testes de médias em apenas uma direção (maior que ou menor que a média observada)."><input type="checkbox" id="unilateral" onchange="update()">Usar testes unilaterais</label><br>
-            <label title="Indica se as estatísticas são de uma proporção, como a porcentagem de amostras que passaram em um teste."><input type="checkbox" id="proportion" onchange="updateFormFields()">Valores de proporção</label><br>
+            <label title="Indica se as estatísticas são de uma proporção, como a porcentagem de amostras que passaram em um teste."><input type="checkbox" id="proportion" onchange="updateFormFields()">Média é uma proporção</label><br>
             <label title="Se o desvio padrão fornecido é o desvio padrão real da população."><input type="checkbox" id="population-stdev-known" onchange="update()">Desvio padrão é populacional</label><br>
             <label title="Tamanho total da população, se conhecido."><input type="checkbox" id="population-n-known" onchange="updateFormFields()">Tamanho da população (N):</label><input id="population-n" type="number" min="0" value="1000" onchange="update()"><br>
             <br>
