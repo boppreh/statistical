@@ -165,7 +165,7 @@ function loadData() {
     document.getElementById("mean").value = mean;
     document.getElementById("stdev").value = stdev;
     document.getElementById("n").value = n;
-    document.getElementsByName("population-stdev-known").checked = false;
+    document.getElementById("population-stdev-known").checked = false;
     updateFormFields();
 }
 
@@ -194,7 +194,7 @@ function update() {
     stdev = get("stdev");
     sx = stdev / Math.sqrt(n)
 
-    if (document.getElementsByName("stdev-known").checked) {
+    if (document.getElementById("population-stdev-known").checked) {
         distribution = normal;
     } else {
         distribution = studentT;
@@ -253,10 +253,7 @@ function updatePower() {
     var xCritical = meanH0 + tc * sx;
     set("x-critical", xCritical);
 
-    var tbeta = (xCritical - mean) * sx;
-    if (meanH0 < mean) {
-        tbeta = -tbeta;
-    }
+    var tbeta = Math.abs(xCritical - mean) * sx;
     var beta = distribution(tbeta, n - 1) * tails;
     var power = 1 - beta;
 
@@ -293,6 +290,7 @@ function updateComparison() {
 
 window.onload = function () {
     var regex = new RegExp(/([\w-]+)=([-0-9.,]+)/g);
+    var match;
     while((match = regex.exec(location.search)) !== null){
         document.getElementById(match[1]).value = Number(match[2]);
     }
@@ -379,22 +377,45 @@ function dStudentT(t, n) {
     }
 }
 
-// Calculates t such that distribution(t, n) == p.
+// Calculates t such that distribution(t, n) == p, for a single tailed distribution.
 function a(distribution, p, n) {
-    var mult = p > 0.5 ? -1 : 1;
+    if (p === 1) {
+        return Number.NEGATIVE_INFINITY;
+    } else if (p === 0) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    if (distribution === normal) {
+        distribution = dNormal;
+    } else if (distribution === studentT) {
+        distribution = dStudentT;
+    }
+
+    if (p === 0.5) {
+        return 0;
+    } else if (p > 0.5) {
+        return -dA(distribution, (1 - p) * 2, n)
+    } else {
+        return dA(distribution, p * 2, n)
+    }
+    
+}
+
+// Calculates t such that distribution(t, n) == p, for a two tailed distribution.
+function dA(distribution, p, n) {
     var v = 0.5;
     var dv = 0.5;
     var t = 0;
     while (dv > 1e-6) {
         t = 1 / v - 1;
         dv = dv / 2;
-        if (distribution(mult * t, n) > p) {
+        if (distribution(t, n) > p) {
             v = v - dv;
         } else {
             v = v + dv;
         }
     }
-    return mult * t;
+    return t;
 }
 
 function statCom(q, i, j, b) {
