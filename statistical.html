@@ -105,6 +105,8 @@ body > .result {
             <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média esperada:</label><input id="expected-mean" type="number" value="170" step="any" onchange="updateFormFields()"><br>
+            <span class="work">H<sub>0</sub>: <span id="expected-mean-h0"></span><br></span>
+            <span class="work">H<sub>1</sub>: <span id="expected-mean-h1"></span><br><br></span>
             <span class="work">t: <span id="expected-mean-t"></span><br></span>
             Valor-p: <span id="expected-mean-p"></span>%<br>
             Resultado: <span id="expected-mean-result"></span>
@@ -135,6 +137,8 @@ body > .result {
             <label title="Desvio padrão observado na amostra do segundo grupo.">Desvio padrão:</label><input id="second-stdev" type="number" value="12" step="any" onchange="updateFormFields()"><br>
             <label title="Número de elementos na amostra do segundo grupo.">Tamanho da amostra:</label><input id="second-n" type="number" value="15" step="1" onchange="updateFormFields()"><br>
             <p>
+            <span class="work">H<sub>0</sub>: <span id="comparison-h0"></span><br></span>
+            <span class="work">H<sub>1</sub>: <span id="comparison-h1"></span><br><br></span>
 
             <span class="work">Variância agrupada: <span id="comparison-variance"></span><br></span>
             <span class="work">Fator de tamanhos: <span id="comparison-sizes"></span><br></span>
@@ -374,6 +378,15 @@ function updateConfidenceInterval() {
 function updateSingleMeanTest() {
     var expectedMean = get("expected-mean");
 
+    set("expected-mean-h0", "média = " + expectedMean);
+    if (tails === 2) {
+        set("expected-mean-h1", "média != " + expectedMean);
+    } else if (expectedMean > mean) {
+        set("expected-mean-h1", "média < " + expectedMean);
+    } else {
+        set("expected-mean-h1", "média > " + expectedMean);
+    }    
+
     var pValue;
     if (isProportion) {
         if (mean < 0.5) {
@@ -431,6 +444,15 @@ function updateComparison() {
     var mean2 = get("second-mean");
     var stdev2 = get("second-stdev");
     var n2 = get("second-n");
+
+    set("comparison-h0", "média<sub>1</sub> = média<sub>2</sub>");
+    if (tails === 1) {
+        set("comparison-h1", "média<sub>1</sub> != média<sub>2</sub>");
+    } else if (mean2 > mean) {
+        set("comparison-h1", "média<sub>1</sub> < média<sub>2</sub>");
+    } else {
+        set("comparison-h1", "média<sub>1</sub> > média<sub>2</sub>");
+    }
 
     var variance = ((n - 1) * stdev * stdev + (n2 - 1) * stdev2 * stdev2) / (n + n2 -2);
     set("comparison-variance", variance);
