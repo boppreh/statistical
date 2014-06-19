@@ -128,6 +128,8 @@ body > .result {
             <br>
             <label title="Probabilidade desejada de rejeitar uma hipótese nula falsa.">Poder do teste desejado (%):</label><input id="target-power" type="number" step="any" min="0" max="100" value="90" onchange="updateFormFields()">
             <br>
+            <span class="work">n<sub>0</sub>: <span id="power-n0"></span><br></span>
+            <span class="work"><span id="power-population-size"></span><br></span>
             Amostras necessárias: <span id="required-sample"></span>
         </details>
 
@@ -449,7 +451,15 @@ function updatePower() {
     var targetPower = get("target-power") / 100;
     var num = a(distribution, (1 - confidence) / tails, n - 1) + a(distribution, 1 - targetPower, n - 1);
     var dem = Math.abs(mean - meanH0) / stdev;
-    set("required-sample", Math.pow(num / dem, 2));
+    var n0 = Math.pow(num / dem, 2);
+    set("power-n0", n0);
+    if (populationN === Number.POSITIVE_INFINITY) {
+        set("power-population-size", "Não se aplica correção porque a população é desconhecida ou infinita.")
+        set("required-sample", n0);
+    } else {
+        set("power-population-size", "Aplica-se correção porque a população é conhecida.")
+        set("required-sample", populationN * n0 / (populationN + n0));
+    }  
 }
 
 function updateComparison() {
