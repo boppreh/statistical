@@ -82,6 +82,10 @@ body > .result {
         </details>
         <br>
 
+        <div class="work" id="proportion-approx"><br></div>
+        <div class="work" id="distribution-type"><br></div>
+        <div class="work" id="e0-correction"><br></div>
+
         <details class="result">
             <summary><h2>Intervalo de Confiança</h2></summary>
             <br>
@@ -292,24 +296,42 @@ function update() {
     if (isProportion) {
         stdev = Math.sqrt(mean * (1 - mean));
         document.getElementById("stdev").value = stdev;
+
+        if (n * mean >= 5 && n * (1 - mean) >= 5 && n >= 30) {
+            set("proportion-approx", "Aproximando a binomial com uma normal porque n >= 30, np >= 5 e n(1-p) >= 5.");
+        } else if (n < 30) {
+            set("proportion-approx", "Não se pode aproximar a binomial com uma normal porque n < 30.");
+        } else {
+            set("proportion-approx", "Não se pode aproximar a binomial com uma normal porque np < 5 ou n(1-p) < 5.");
+        }
     } else {
+        set("proportion-approx", "");
         stdev = get("stdev");
     }
     sx = stdev / Math.sqrt(n)
 
     if (document.getElementById("population-stdev-known").checked) {
+        set("distribution-type", "Usa-se a distribuição normal porque o desvio padrão populacional é conhecido.");
+        distribution = normal;
+    } else if (n >= 30) {
+        set("distribution-type", "Usa-se a distribuição normal, apesar do desvio padrão populacional ser desconhecido, porque n >= 30.");
         distribution = normal;
     } else {
+        set("distribution-type", "Usa-se a distribuição t de Student porque o desvio padrão populacional é desconhecido e n < 30.");
         distribution = studentT;
     }
 
     if (document.getElementById("population-n").disabled) {
         populationN = Number.POSITIVE_INFINITY;
+        set("e0-correction", "Não é preciso corrigir e<sub>0</sub> porque o tamanho da população é desconhecido.");
     } else {
         populationN = get("population-n");
-        if (populationN * 0.05 < n) {
+        if (n / populationN > 0.05) {
+            set("e0-correction", "É preciso corrigir e<sub>0</sub> porque n/N > 5%");
             sx *= Math.sqrt((populationN - n) / (populationN - 1));
-        }            
+        } else {
+            set("e0-correction", "Não é preciso corrigir e<sub>0</sub> porque n/N < 5%");
+        }
     }
 
     var showWork = document.getElementById("show-work").checked;
