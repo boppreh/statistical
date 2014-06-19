@@ -117,6 +117,9 @@ body > .result {
             <br>
 
             <label title="Média esperada caso a amostra fosse aleatória.">Média em H<sub>0</sub>:</label><input id="mean-h0" type="number" value="170" step="any" onchange="updateFormFields()"><br>
+            <span class="work">H<sub>0</sub>: <span id="power-h0"></span><br></span>
+            <span class="work">H<sub>1</sub>: <span id="power-h1"></span><br><br></span>
+
             <span class="work">t crítico: <span id="t-critical"></span><br></span>
             <span class="work">X crítico: <span id="x-critical"></span><br></span>
             <span class="work">t beta: <span id="t-beta"></span><br></span>
@@ -412,6 +415,15 @@ function updateSingleMeanTest() {
 
 function updatePower() {
     var meanH0 = get("mean-h0");
+
+    set("power-h0", "média = " + meanH0);
+    if (tails === 2) {
+        set("power-h1", "média != " + meanH0);
+    } else if (meanH0 > mean) {
+        set("power-h1", "média < " + meanH0);
+    } else {
+        set("power-h1", "média > " + meanH0);
+    }  
 
     var tc = a(distribution, 1 - confidence, n - 1);
     if (meanH0 > mean) {
