@@ -327,10 +327,10 @@ function update() {
     } else {
         populationN = get("population-n");
         if (n / populationN > 0.05) {
-            set("e0-correction", "É preciso corrigir e<sub>0</sub> porque n/N > 5%");
+            set("e0-correction", "É preciso corrigir e<sub>0</sub> porque n/N > 5%.");
             sx *= Math.sqrt((populationN - n) / (populationN - 1));
         } else {
-            set("e0-correction", "Não é preciso corrigir e<sub>0</sub> porque n/N < 5%");
+            set("e0-correction", "Não é preciso corrigir e<sub>0</sub> porque n/N < 5%.");
         }
     }
 
