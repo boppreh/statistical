@@ -8,8 +8,8 @@ de duas médias (comparação de tratamento).
 A ferramenta é completamente web e [pode ser acessada nesta página](http://boppreh.com/statistical/).
 
 
-Instruções
-----------
+Informações
+-----------
 
 - As análises são refeitas a cada mudança e atualizadas em tempo real.
 - Cada ferramenta é independente, portanto não é preciso preencher o Erro Máximo Esperado se você só deseja realizar o teste de uma média.
@@ -18,3 +18,4 @@ Instruções
 - A opção "Mostrar Resolução" revela as variáveis intermediárias usadas nos cálculos.
 - A "Precisão" afeta apenas os dados exibidos, não os dados calculados, e funciona por arredondamento e não por truncamento.
 - Se tiver dúvida de algum campo de entrada, passa o mouse por cima do rótulo para uma descrição mais detalhada.
+- A página é completamente auto-contida e pode ser salva no seu computador para uso offline.
